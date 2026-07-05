@@ -85,3 +85,14 @@ def test_workflow_qa_has_required_fields():
     assert "issues" in qa
     assert "feedback" in qa
     assert qa["decision"] in ("APPROVED", "REJECTED")
+
+
+def test_workflow_debug_mode_does_not_crash():
+    set_level("ERROR")
+    reviews = ["Great product", "Terrible support"]
+    engine = WorkflowEngine(max_retries=3, debug=True)
+    result = engine.run(reviews, None)
+    assert result["final_state"] in ("APPROVED", "REJECTED")
+    assert "insight" in result["artifacts"]
+    assert "marketing" in result["artifacts"]
+    assert "qa" in result["artifacts"]
