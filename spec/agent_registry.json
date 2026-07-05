@@ -1,0 +1,17 @@
+{
+    "customer_insight": {
+      "input": "reviews[] + product_info",
+      "output": "insight_schema.json",
+      "version": "v1"
+    },
+    "marketing": {
+      "input": "insight_json",
+      "output": "marketing_schema.json",
+      "version": "v1"
+    },
+    "qa": {
+      "input": "insight_json + marketing_json",
+      "output": "qa_schema.json",
+      "version": "v1"
+    }
+  }

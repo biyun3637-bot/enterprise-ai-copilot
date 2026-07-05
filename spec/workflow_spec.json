@@ -1,0 +1,25 @@
+{
+    "nodes": [
+      "insight_agent",
+      "marketing_agent",
+      "qa_agent"
+    ],
+    "edges": [
+      {
+        "from": "insight_agent",
+        "to": "marketing_agent"
+      },
+      {
+        "from": "marketing_agent",
+        "to": "qa_agent"
+      }
+    ],
+    "retry_policy": {
+      "qa_failed": "marketing_agent",
+      "max_retry": 3
+    },
+    "final_states": [
+      "APPROVED",
+      "REJECTED"
+    ]
+  }

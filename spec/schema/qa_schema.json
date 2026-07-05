@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "required": [
+      "overall_score",
+      "decision",
+      "issues",
+      "feedback"
+    ],
+    "properties": {
+      "overall_score": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "decision": {
+        "type": "string",
+        "enum": ["APPROVED", "REJECTED"]
+      },
+      "issues": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "feedback": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }

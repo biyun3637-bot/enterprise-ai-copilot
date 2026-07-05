@@ -1,0 +1,24 @@
+{
+    "type": "object",
+    "required": [
+      "pain_points",
+      "advantages",
+      "customer_segments",
+      "confidence_score"
+    ],
+    "properties": {
+      "pain_points": {
+        "type": "array"
+      },
+      "advantages": {
+        "type": "array"
+      },
+      "customer_segments": {
+        "type": "array"
+      },
+      "confidence_score": {
+        "type": "number"
+      }
+    },
+    "additionalProperties": false
+  }

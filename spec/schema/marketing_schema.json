@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "required": [
+      "campaign_suggestions",
+      "target_audience",
+      "key_messaging",
+      "confidence_score"
+    ],
+    "properties": {
+      "campaign_suggestions": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "target_audience": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "key_messaging": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "confidence_score": {
+        "type": "number"
+      }
+    },
+    "additionalProperties": false
+  }
