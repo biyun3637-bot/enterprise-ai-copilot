@@ -1,4 +1,4 @@
-﻿import json, os, random, traceback
+import json, os, random, traceback
 from openai import OpenAI
 from src.config import settings
 from src.tools.logger import info, error
@@ -182,18 +182,25 @@ def _format_prompt(agent_type: str, data: dict) -> str:
         pi = data.get("product_info")
         if pi:
             lines.append(f"\nProduct Info: {json.dumps(pi, ensure_ascii=False)}")
+        bb = data.get("business_brief")
+        if bb:
+            lines.append(f"\nBusiness Brief (use as context):\n{json.dumps(bb, indent=2, ensure_ascii=False)}")
         return "\n".join(lines)
     elif agent_type == "marketing":
-        return (
-            "Based on this customer insight, generate marketing content:\n\n"
-            f"{json.dumps(data.get('insight', {}), indent=2, ensure_ascii=False)}"
-        )
+        lines = ["Based on this customer insight, generate marketing content:\n"]
+        lines.append(json.dumps(data.get("insight", {}), indent=2, ensure_ascii=False))
+        bb = data.get("business_brief")
+        if bb:
+            lines.append(f"\nBusiness Brief (use as context):\n{json.dumps(bb, indent=2, ensure_ascii=False)}")
+        return "\n".join(lines)
     elif agent_type == "qa":
-        return (
-            "Evaluate this marketing output against the original insight:\n\n"
-            f"Insight:\n{json.dumps(data.get('insight', {}), indent=2, ensure_ascii=False)}\n\n"
-            f"Marketing:\n{json.dumps(data.get('marketing', {}), indent=2, ensure_ascii=False)}"
-        )
+        lines = ["Evaluate this marketing output against the original insight:\n"]
+        lines.append(f"Insight:\n{json.dumps(data.get('insight', {}), indent=2, ensure_ascii=False)}")
+        lines.append(f"\nMarketing:\n{json.dumps(data.get('marketing', {}), indent=2, ensure_ascii=False)}")
+        bb = data.get("business_brief")
+        if bb:
+            lines.append(f"\nBusiness Brief (use as context for evaluation):\n{json.dumps(bb, indent=2, ensure_ascii=False)}")
+        return "\n".join(lines)
     return json.dumps(data, ensure_ascii=False)
 
 

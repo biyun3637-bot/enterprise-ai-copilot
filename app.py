@@ -50,6 +50,19 @@ with st.sidebar:
     if debug_mode:
         st.warning("Debug ON: showing inputs, states, and validation per step")
 
+    st.markdown("---")
+    with st.expander("Business Brief (V2)", expanded=False):
+        st.caption("Shared context for all agents (read-only)")
+        st.text_input("Product Name", value="DataSync Pro", key="bb_product")
+        st.text_input("Category", value="Cloud Data Tool", key="bb_category")
+        st.text_input("Brand", value="DataSync", key="bb_brand")
+        st.text_input("Target Market", value="North America", key="bb_market")
+        st.text_input("Target Audience", value="Enterprise teams", key="bb_audience")
+        st.text_input("Brand Position", value="Premium", key="bb_position")
+        st.text_input("Price Range", value="$29-$99/month", key="bb_price")
+        st.text_input("Business Goal", value="Increase market share", key="bb_goal")
+        st.text_area("Core Features (one per line)", value="Large file upload\nReal-time sync\nCSV export\nTeam collaboration", height=100, key="bb_features")
+
 st.title("Enterprise AI Growth Copilot")
 st.markdown("### Input Reviews")
 st.text_area("Enter reviews, one per line:", value="", height=180, placeholder="Paste your product reviews here...", key="reviews_area")
@@ -69,13 +82,24 @@ if run_clicked:
     if not reviews_list:
         st.warning("Please enter at least one review.")
         st.stop()
+    bb = {
+        "product_name": st.session_state.bb_product,
+        "category": st.session_state.bb_category,
+        "brand": st.session_state.bb_brand,
+        "target_market": st.session_state.bb_market,
+        "target_audience": st.session_state.bb_audience,
+        "brand_position": st.session_state.bb_position,
+        "price_range": st.session_state.bb_price,
+        "business_goal": st.session_state.bb_goal,
+        "core_features": [f.strip() for f in st.session_state.bb_features.split("\n") if f.strip()],
+    }
     set_level("ERROR" if not debug_mode else "INFO")
     progress = st.status("Running pipeline...", expanded=True, state="running")
 
     # Step 1: Insight
     progress.update(label="Customer Insight: analyzing reviews...")
     t0 = time.time()
-    insight_result = insight_run(reviews_list, product_info())
+    insight_result = insight_run(reviews_list, product_info(), business_brief=bb)
     insight_time = round(time.time() - t0, 2)
     st.markdown(f"**Customer Insight** - {insight_time}s")
     if debug_mode:
@@ -91,7 +115,7 @@ if run_clicked:
     # Step 2: Marketing
     progress.update(label="Marketing: generating content...")
     t0 = time.time()
-    marketing_result = marketing_run(insight_result["data"])
+    marketing_result = marketing_run(insight_result["data"], business_brief=bb)
     mkt_time = round(time.time() - t0, 2)
     st.markdown(f"**Marketing Agent** - {mkt_time}s")
     if debug_mode:
@@ -112,7 +136,7 @@ if run_clicked:
     while True:
         progress.update(label=f"QA: evaluating (attempt {retry_count + 1})...")
         t0 = time.time()
-        qa_result = qa_run(insight_result["data"], marketing_data)
+        qa_result = qa_run(insight_result["data"], marketing_data, business_brief=bb)
         qa_time = round(time.time() - t0, 2)
         qa_data = qa_result["data"]
 
@@ -148,16 +172,28 @@ if run_clicked:
             progress.update(label=f"Rejected after {max_retries} retries", state="error")
             break
         progress.update(label=f"Score {qa_data['overall_score']} less than 80, retry {retry_count}/{max_retries}...")
-        marketing_result = marketing_run(insight_result["data"])
+        marketing_result = marketing_run(insight_result["data"], business_brief=bb)
         marketing_data = marketing_result["data"]
         st.markdown(f"**Marketing Agent (retry {retry_count})**")
         st.json(marketing_data)
 
+    bb = {
+        "product_name": st.session_state.bb_product,
+        "category": st.session_state.bb_category,
+        "brand": st.session_state.bb_brand,
+        "target_market": st.session_state.bb_market,
+        "target_audience": st.session_state.bb_audience,
+        "brand_position": st.session_state.bb_position,
+        "price_range": st.session_state.bb_price,
+        "business_goal": st.session_state.bb_goal,
+        "core_features": [f.strip() for f in st.session_state.bb_features.split("\n") if f.strip()],
+    }
     st.session_state.results = {
         "insight": insight_result["data"], "marketing": marketing_data, "qa": qa_data,
         "insight_time": insight_time, "mkt_time": mkt_time, "qa_time": qa_time,
         "retries": retry_count, "final_state": qa_data["decision"],
         "total_time": round(insight_time + mkt_time + qa_time, 2),
+        "business_brief": bb,
     }
 
     st.divider()
@@ -168,6 +204,9 @@ if run_clicked:
     cols[1].metric("Final State", r["final_state"])
     cols[2].metric("Retry Count", r["retries"])
     cols[3].metric("Validation", "PASSED")
+
+    with st.expander("Business Brief (Shared Context)", expanded=False):
+        st.json(r["business_brief"])
 
     st.divider()
     st.markdown("### Agent Results")

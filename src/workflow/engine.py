@@ -41,13 +41,17 @@ class WorkflowEngine:
         for line in json.dumps(output, indent=2, ensure_ascii=False).split("\n"):
             print(f"      {line}")
 
-    def run(self, reviews: list[str], product_info: dict | None = None) -> dict:
+    def run(self, reviews: list[str], product_info: dict | None = None, business_brief: dict | None = None) -> dict:
+        self.business_brief = business_brief
+
         info("Engine", "Workflow started", review_count=len(reviews))
         if self.debug:
             print("\n" + "\u2550" * 52)
             print("  Enterprise AI Growth Copilot - Debug Trace")
             print("\u2550" * 52)
             print(f"\n  Input: {len(reviews)} reviews" + (f", 1 product info" if product_info else ""))
+            if business_brief:
+                print(f"  Business Brief: {business_brief.get('product_name', 'N/A')}")
 
         # --- Step 1: Insight Agent ---
         info("Engine", "Running Insight Agent")
@@ -56,7 +60,7 @@ class WorkflowEngine:
             print(f"\n  \u2193\n")
             print(f"  --- Customer Insight Agent ---")
         t0 = time.time()
-        insight_result = insight_run(reviews, product_info)
+        insight_result = insight_run(reviews, product_info, business_brief=business_brief)
         self.artifacts["insight"] = insight_result["data"]
         if self.debug:
             self._debug_agent("Customer Insight Agent",
@@ -70,7 +74,7 @@ class WorkflowEngine:
             print(f"\n  \u2193\n")
             print(f"  --- Marketing Agent ---")
         t0 = time.time()
-        marketing_result = marketing_run(self.artifacts["insight"])
+        marketing_result = marketing_run(self.artifacts["insight"], business_brief=business_brief)
         self.artifacts["marketing"] = marketing_result["data"]
         if self.debug:
             self._debug_agent("Marketing Agent",
@@ -128,7 +132,7 @@ class WorkflowEngine:
             if self.debug:
                 print(f"\n  \u21bb QA rejected, retrying Marketing ({self.retry_count}/{self.max_retries})")
                 t0 = time.time()
-            marketing_result = marketing_run(self.artifacts["insight"])
+            marketing_result = marketing_run(self.artifacts["insight"], business_brief=self.business_brief)
             self.artifacts["marketing"] = marketing_result["data"]
             if self.debug:
                 self._debug_agent("Marketing Agent (retry)",
@@ -140,5 +144,6 @@ class WorkflowEngine:
         return {
             "final_state": self.state.value,
             "retries": self.retry_count,
+            "business_brief": getattr(self, "business_brief", None),
             "artifacts": self.artifacts,
         }

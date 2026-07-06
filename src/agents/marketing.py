@@ -7,10 +7,14 @@ from src.tools.logger import info
 _SCHEMA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "spec", "schema", "marketing_schema.json")
 
 
-def run(insight_data: dict) -> dict:
+def run(insight_data: dict, business_brief: dict | None = None) -> dict:
     info("MarketingAgent", "Starting marketing generation")
 
-    raw = llm_call("marketing", {"insight": insight_data})
+    data = {"insight": insight_data}
+    if business_brief:
+        data["business_brief"] = business_brief
+        info("MarketingAgent", "Business Brief received", brand=business_brief.get("brand"))
+    raw = llm_call("marketing", data)
 
     schema = load_schema(_SCHEMA_PATH)
     result = validate_or_fail(raw, schema)
