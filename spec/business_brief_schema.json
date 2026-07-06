@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "required": [
+    "product_name",
+    "category",
+    "brand",
+    "target_market",
+    "target_audience",
+    "brand_position",
+    "price_range",
+    "business_goal",
+    "core_features"
+  ],
+  "properties": {
+    "product_name": { "type": "string" },
+    "category": { "type": "string" },
+    "brand": { "type": "string" },
+    "target_market": { "type": "string" },
+    "target_audience": { "type": "string" },
+    "brand_position": { "type": "string" },
+    "price_range": { "type": "string" },
+    "business_goal": { "type": "string" },
+    "core_features": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

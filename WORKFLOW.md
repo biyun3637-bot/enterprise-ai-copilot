@@ -55,3 +55,40 @@ The schema validator checks required fields, types, enums, ranges, and forbids e
 State enum: src/workflow/state.py
 Transitions: src/workflow/graph.py
 Orchestration: src/workflow/engine.py
+
+---
+
+## Shared Context (Business Brief V2)
+
+Starting from V2, the pipeline carries a **Business Brief** as shared
+read-only context across all agents.
+
+### Flow
+
+```
+Pipeline Start
+    |
+    +-- Load Business Brief from input
+    |
+    v
+Business Brief (immutable throughout run)
+    |          |          |
+    v          v          v
+Insight --> Marketing --> QA
+```
+
+### Rules
+
+- Business Brief is loaded once at the beginning of each run.
+- It is **not a pipeline node** and does not have its own state.
+- It is available as a read-only dict to every agent.
+- Agents cannot modify the Business Brief.
+- If the Business Brief is invalid, the pipeline should reject it
+  before entering the first agent.
+
+### Rationale
+
+In V1, product information was passed only to the Insight Agent as an
+optional parameter. Marketing and QA had no direct access to business
+context. In V2, all agents receive the same Business Brief, ensuring
+consistent business logic across the entire pipeline.

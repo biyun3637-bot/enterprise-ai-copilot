@@ -200,3 +200,35 @@ src/
 app.py                 Streamlit UI
 tests/                 17 pytest tests
 spec/schema/           3 JSON Schema files
+spec/                     business_brief_schema.json
+
+### 8. Shared Context (Business Brief)
+
+In V2, a Business Brief is introduced as **shared immutable context**
+available to all agents throughout the pipeline.
+
+```
+                        Business Brief
+                        (read-only)
+                            |
+        ┌───────────────────┼───────────────────┐
+        v                   v                   v
+   Insight Agent      Marketing Agent       QA Agent
+```
+
+- Business Brief is **NOT an Agent**. It does not execute logic.
+- It is a passive data structure loaded at pipeline start.
+- All agents can **read** from it but never modify it.
+- This eliminates the need for agents to infer business information
+  from raw reviews, reducing hallucination.
+
+**Schema**: spec/business_brief_schema.json
+
+Fields:
+- product_name / category / brand / target_market
+- target_audience / brand_position / price_range
+- business_goal / core_features
+
+**Design Principle**:
+Business Brief is loaded once before the pipeline starts and passed
+alongside the agent data. It is immutable during one workflow run.
